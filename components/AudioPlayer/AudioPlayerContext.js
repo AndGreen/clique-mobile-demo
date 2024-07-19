@@ -80,7 +80,7 @@ export const AudioPlayerProvider = ({ children }) => {
   return (
     <AudioPlayerContext.Provider value={value}>
       {children}
-      <AudioPlayer />
+      {/*<AudioPlayer />*/}
     </AudioPlayerContext.Provider>
   );
 };
