@@ -1,8 +1,11 @@
 import { SafeAreaView, ScrollView, Text, View } from 'react-native';
 import { Stack } from 'expo-router';
 import RecorderWidget from '@/components/RecorderWidget/RecorderWidget';
+import { useRef } from 'react';
 
 export default function Home() {
+    const scrollViewRef = useRef(null);
+
     return (
         <View className="flex-1 justify-center items-center bg-[#F2F2F2]">
             <Stack.Screen
@@ -10,9 +13,14 @@ export default function Home() {
                     title: 'My home',
                 }}
             />
-            <ScrollView className="flex-1 p-8" contentInsetAdjustmentBehavior="automatic">
+
+            <ScrollView
+                ref={scrollViewRef}
+                id="scrollView"
+                className="flex-1 p-8"
+                contentInsetAdjustmentBehavior="automatic">
                 <SafeAreaView>
-                    <RecorderWidget />
+                    <RecorderWidget scrollViewRef={scrollViewRef} />
                     <Text>
                         What is Lorem Ipsum? Lorem Ipsum is simply dummy text of the printing and
                         typesetting industry. Lorem Ipsum has been the industrys standard dummy text

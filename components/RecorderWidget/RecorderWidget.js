@@ -10,7 +10,7 @@ import PlayIcon from './assets/play.svg';
 import PauseIcon from './assets/pause.svg';
 import './RecorderWidget.css';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { TextInput, View } from 'react-native';
+import { Pressable, Text, TextInput, View } from 'react-native';
 
 const RECORDING_STATUS = {
     RECORDING: 'recording',
@@ -47,7 +47,7 @@ const TRANSCRIBING = 'Обработка...';
 const INPUT_PLACEHOLDER = 'Напиши свой бим';
 const EDIT_YOUR_THOUGHT = 'Отредактируй свою мысль';
 
-function RecorderWidget() {
+function RecorderWidget({ scrollViewRef }) {
     const {
         isRecorderWidgetOpen: isOpen,
         recorderWidgetState,
@@ -106,20 +106,12 @@ function RecorderWidget() {
     }, []);
 
     useEffect(() => {
-        const preventDefault = (e) => {
-            e.preventDefault();
-        };
-
-        if (isOpen) {
-            // Add event listeners to disable scroll
-            window.addEventListener('wheel', preventDefault, { passive: false });
-            window.addEventListener('touchmove', preventDefault, { passive: false });
-
-            // Remove event listeners on cleanup
-            return () => {
-                window.removeEventListener('wheel', preventDefault);
-                window.removeEventListener('touchmove', preventDefault);
-            };
+        if (scrollViewRef.current) {
+            if (isOpen) {
+                scrollViewRef.current.setNativeProps({ scrollEnabled: false });
+            } else {
+                scrollViewRef.current.setNativeProps({ scrollEnabled: true });
+            }
         }
     }, [isOpen]);
 
@@ -223,7 +215,6 @@ function RecorderWidget() {
     // Handle visibility change (e.g., control center or background)
     const handleVisibilityChange = () => {
         if (
-            //TODO: update to react native
             document.visibilityState === 'hidden' &&
             mediaRecorderRef.current &&
             mediaRecorderRef.current.state === RECORDING_STATUS.RECORDING
@@ -321,7 +312,7 @@ function RecorderWidget() {
             handleRecordComplete(LISTENING);
 
             // Set up a timer for the recording limit
-            recordingTimeoutRef.current = window.setTimeout(() => {
+            recordingTimeoutRef.current = setTimeout(() => {
                 stopRecording();
             }, MAX_RECORD_TIME);
 
@@ -373,11 +364,12 @@ function RecorderWidget() {
                         />
                     )}
                     {isOpen && (
-                        <View
-                            className={`absolute top-5 left-3 sm:left-6 rounded-full focus:outline-none focus:shadow-outline ${recorderWidgetState === RECORD_STATE.NEW_RECORD ? 'text-[#FFFFFF]' : 'text-[#F1F3F4]'}`}
-                            onClick={goBack}>
-                            <BackIcon width={24} height={24} />
-                        </View>
+                        <Pressable onClick={goBack}>
+                            <View
+                                className={`absolute top-5 left-3 sm:left-6 rounded-full focus:outline-none focus:shadow-outline ${recorderWidgetState === RECORD_STATE.NEW_RECORD ? 'text-[#FFFFFF]' : 'text-[#F1F3F4]'}`}>
+                                <BackIcon width={24} height={24} />
+                            </View>
+                        </Pressable>
                     )}
                     {recorderWidgetState === RECORD_STATE.NEW_RECORD && (
                         <>
@@ -414,20 +406,20 @@ function RecorderWidget() {
                                     {isOnVoice && (
                                         <>
                                             <Text>{LISTENING_TO_YOU}</Text>
-                                            <Text>
-                                                {formatTime(timer)}
+                                            <View>
+                                                <Text>{formatTime(timer)}</Text>
                                                 <Text>
                                                     {' '}
                                                     / {millisToMinutesAndSeconds(MAX_RECORD_TIME)}
                                                 </Text>
-                                            </Text>
+                                            </View>
                                         </>
                                     )}
                                     <View
                                         className="flex flex-row items-center justify-center gap-2 min-h-8 py-2 px-5 rounded-full focus:outline-none focus:shadow-outline bg-[#FFFFFF] text-[#292626]"
                                         onClick={handleDone}>
                                         <ArrowRightIcon width={24} height={24} />
-                                        {DONE}
+                                        <Text>{DONE}</Text>
                                     </View>
                                 </View>
                             )}
